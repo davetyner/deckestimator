@@ -1,0 +1,4 @@
+db: konacon1_dest
+u: konacon1_deckest
+p: K77]S6kJ#&hv
+
