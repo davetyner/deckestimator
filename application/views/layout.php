@@ -465,12 +465,13 @@ $arr = $framing;
 <script type='text/javascript' language='javascript'>
     $(document).ready(function(){
         var sList = "";
-/*        $('.item_img.border').click(function(){
-           console.log($(this).prop("id"));
-        });*/
-        /*$('input[type=checkbox]').change(function(){*/
-        $(".item_img.border").click(function(){
-
+    });
+        /*$(".item_img.border").click(function(){*/
+        function CheckCheckboxes(){
+            var length = $("#length").val();
+            var width = $("#width").val();
+            var matcheck = false;
+            if(!length || !width) return false;
             var dims = getdims();
             var vals = {};
             console.log('\n');
@@ -479,17 +480,17 @@ $arr = $framing;
             {
                 var length = dims['length'];
                 var width = dims['width'];
-                console.log('width\t' + width);
                 var sqft = length*width;
-                var linft = dims['linft'];
-                var bordft = dims['bordft'];
-
                 var dim = "";
                 if(Number(width)>12) dim = "2x10";
                 else dim = "2x8"
                 vals['dim'] = dim;
             }
-
+            var options = get_checkboxes();
+            for (var key in options) {
+                vals[key] = options[key];
+                console.log('options\t' + key + ' : ' + options[key]);
+            }
                 $('input[type=checkbox]').each(function () {
                     var sThisVal = (this.checked ? "1" : "0");
                     if(sThisVal == "1") var chkid = ($(this).prop("id"));
@@ -502,17 +503,18 @@ $arr = $framing;
                             var sec = idstr[0];
                             var id = idstr[1];
                             var arrname = idstr[0] + "arr";
-                            console.log("section name:\t" + sec);
+/*                            console.log("section name:\t" + sec);
                             console.log("section id:\t" + id);
                             console.log("arr name:\t" + arrname);
                             var rate_min = arrloop(arrname,"id",id,"rate_min")
                             var rate_max = arrloop(arrname,"id",id,"rate_max")
                             if(rate_min) console.log(sec + " rate_min:\t" + rate_min);
-                            if(rate_max) console.log(sec + " rate_max:\t" + rate_max);
+                            if(rate_max) console.log(sec + " rate_max:\t" + rate_max);*/
                             if(sec=="deckmat")
                             {
                                 vals['material'] = arrloop("deckmatarr","id",id,"qname");
-                                //console.log("material\t" + material);
+                                matcheck = true;
+                                console.log("matcheck\t" + matcheck);
                             }
                             else if(sec=="deckingoptions")
                             {
@@ -524,16 +526,59 @@ $arr = $framing;
                                 console.log('material\t' + vals['material']);
                                 console.log('style\t' + vals['style']);
                                 var q = "select * from framing where dim = '" + vals['dim'] + "' AND style = '" + vals['style'] + "' AND material = '" + vals['material'] + "'";
-                                var qresults = sql(vals);
-                                console.log(qresults);
-
-                                console.log('\n');
+                                console.log(q);
+                                if(matcheck==true) var qresults = sql(vals);
                             }
+
                         }
                     }
                 });
-            });
-    });
+        }
+
+    function get_checkboxes()
+    {
+        var vals={};
+        $('input[type=checkbox]').each(function () {
+            var sThisVal = (this.checked ? "1" : "0");
+            if(sThisVal == "1") var chkid = ($(this).prop("id"));
+            if(chkid)
+            {
+                console.log("id:\t" + chkid);
+                var idstr = chkid.split("_");
+                if(idstr.length>0)
+                {
+                    var sec = idstr[0];
+                    var id = idstr[1];
+                    var arrname = idstr[0] + "arr";
+                }
+
+                if(sec=="deckingoptionsbord")
+                {
+                    console.log("border id\t" + id);
+                    vals['deckingoptionsbordid'] = id
+                }
+                else if(sec == "railing")
+                {
+                    vals['railingid'] = id
+                }
+                else if(sec == "stairs")
+                {
+                    vals['stairsid'] = id
+                }
+                else if(sec == "lighting")
+                {
+                    vals['lightingid'] = id
+                }
+                else if(sec == "extras")
+                {
+                    vals['extrasid'] = id
+                }
+
+            }
+
+        });
+        return vals;
+    }
 
     function count_checkboxes()
     {
@@ -557,8 +602,8 @@ $arr = $framing;
         if(length && width)
         {
             sqft = length*width;
-            linft = length*(width*2);
-            bordft = (length*2)*(width*2);
+            linft = (+width*2)+(+length);
+            bordft = (length*2)+(width*2);
 
             console.log("sqft:\t" + sqft);
             //return sqft;
@@ -568,6 +613,21 @@ $arr = $framing;
             dims['bordft'] = bordft;
             dims['width'] = width;
             dims['length'] = length;
+            if(height)
+            {
+                dims['height'] = height;
+                var tot = +height*12;
+                var nsteps = Math.ceil(tot/7);
+                dims['num_steps'] = nsteps;
+                var qtylights = 1;
+                if (nsteps <= 3 && nsteps > 1) qtylights = 2;
+                else qtylights = nsteps/3;
+                dims['num_step_lights'] = qtylights;
+            }
+            else
+            {
+                dims['height'] = 'Please enter Height for Deck'
+            }
             return dims;
         }
     }
@@ -653,24 +713,117 @@ $arr = $framing;
     {
         var res=[];
         var addft = 0;
+        var baseaddft = 0;
         var i=0;
+        var min_sec_diff = 0 ;
+        var mindiff = 0 ;
+        var min_base_total = 0;
+        var min_base_rate = 0;
+        var nummin = 0;
+        var style = "" ;
+        var qual_arr = {};
+
+        $('#result_table').append('<br/>' + 'base rate : ' + baseratemin);
         $.each(data.results, function(k, v) {
             $.each(v, function(key, value) {
-                //$('#result_table').append('<br/>' + key + ' : ' + value);
+                $('#result_table').append('<br/>' + key + ' : ' + value);
                 if(key == "rate_min") addft = value;
+                if(key == "style") style = value;
             })
         });
+        $('#result_table').append('<br/>');
+        $.each(data.base_result, function(k, v) {
+            $.each(v, function(key, value) {
+                if (v['style'] == "strait")
+                {
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                    if(key == "rate_min") baseaddft = value;
+                }
+            })
+        });
+        if(data.bord_result)
+        {
+        $('#result_table').append('<br/>BORDER<br/>');
+        $.each(data.bord_result, function(k, v) {
+            $.each(v, function(key, value) {
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+            });
+        });
+        }
+
+        if(data.railing_result)
+        {
+            $('#result_table').append('<br/>RAILING<br/>');
+            $.each(data.railing_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+
+        if(data.stairs_result)
+        {
+            $('#result_table').append('<br/>RAILING<br/>');
+            $.each(data.stairs_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+
         console.log('addft\t' + addft);
         var mat = $("#deckmat_low_total");
         var deckopt = $("#deckingoptions_low_total");
-        var dims = getdims();
-        var sqft = dims['sqft'];
+        var dimarr = getdims();
+
+        baseaddft = +baseaddft;
+        addft = +addft;
+
+        for (var key in dimarr) {
+            $('#result_table').append('<br/>' + key + ' : ' + dimarr[key]);
+        }
+
+        var sqft = dimarr['sqft'];
         var basemin = Number(baseratemin);
         var basemax = Number(baseratemax);
-        var num = basemin + Number(addft);
-        var answer = num*sqft;
-        $(mat).html('$' + answer);
-        $(deckopt).html('$' + answer);
+        min_base_rate = basemin;
+
+        if (baseaddft < 0 )
+        {
+            min_base_rate = basemin + baseaddft;
+            console.log("Baseaddft base rate\t"  + min_base_rate);
+            min_base_total = min_base_rate * sqft
+        }
+        else min_base_total = basemin * sqft;
+
+
+        $(mat).html('$' + min_base_total);
+
+        if (addft != basemin)
+        {
+            if (addft < 0 )
+            {
+                opt_min_rate = basemin + addft;
+                console.log('OPT base rate\t' + opt_min_rate);
+                min_sec_diff = (opt_min_rate * sqft) - min_base_total;
+                console.log("min_sec_diff\t" + min_sec_diff);
+                if( min_sec_diff < 0 ) min_sec_diff = 0;
+            }
+            else if(addft > 0)
+            {
+                var opt_min_rate = basemin + addft;
+                console.log("opt_min_rate\t" + opt_min_rate);
+                min_sec_diff = (opt_min_rate * sqft) - min_base_total;
+                console.log("min_sec_diff\t" + min_sec_diff);
+                console.log("min_base_total\t" + min_base_total);
+                if( min_sec_diff < 0 ) min_sec_diff = 0;
+            }
+        }
+
+
+        $('#result_table').append('<br/>' + 'min_sec_diff : ' + min_sec_diff);
+
+        $(deckopt).html('$' + min_sec_diff);
     }
 </script>
 </html>

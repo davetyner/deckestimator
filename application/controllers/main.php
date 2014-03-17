@@ -79,16 +79,33 @@ function alter($name=null)
     function getValues(){
         if($_POST)
         {
+            $bordid=0;
+            $railingid=0;
+            $stairsid=0;
             $dim = $this->input->post('dim');
             $material = $this->input->post('material');
             $style = $this->input->post('style');
+            if($this->input->post('deckingoptionsbordid')) $bordid = $this->input->post('deckingoptionsbordid');
+            if($this->input->post('railingid')) $railingid = $this->input->post('railingid');
+            if($this->input->post('stairsid')) $stairsid = $this->input->post('stairsid');
         }
 
         $q = "select * from framing where dim = '" . $dim . "' AND style = '" . $style . "' AND material = '" . $material . "'";
-        //echo $q;
-        //die();
+        $q2 = "select * from framing where dim = '" . $dim . "' AND material = '" . $material . "'";
         $this->load->model('get_db');
+
+        $bord_q = "select * from deckingoptions where id =" . $bordid;
+        $data['bord_result'] = $this->get_db->getAll($bord_q);
+
+        $railing_q = "select * from railing where id =" . $railingid;
+        $data['railing_result'] = $this->get_db->getAll($railing_q);
+
+        $stairsid_q = "select * from stairs where id =" . $stairsid;
+        $data['stairs_result'] = $this->get_db->getAll($stairsid_q);
+
         $data['results'] = $this->get_db->getAll($q);
+        $data['base_result'] = $this->get_db->getAll($q2);
+
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($data));
         return $data;

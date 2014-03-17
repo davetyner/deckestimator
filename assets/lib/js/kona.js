@@ -227,7 +227,7 @@ function checkit(name,id)
 
 //---------------> CheckCheckboxes <----------------//
 
-function CheckCheckboxes(id,m){
+function CheckCheckboxes3(id,m){
     //console.log(statsarr);
     if(m)console.log("id:\t" + id);
     var n=0;
