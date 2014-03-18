@@ -713,7 +713,13 @@ $arr = $framing;
     {
         var res=[];
         var addft = 0;
+        var bordft = 0 ;
+        var linft = 0 ;
         var baseaddft = 0;
+        var bordmin = 0;
+        var bordmax = 0;
+        var railingmin = 0;
+        var railingmax = 0;
         var i=0;
         var min_sec_diff = 0 ;
         var mindiff = 0 ;
@@ -722,6 +728,13 @@ $arr = $framing;
         var nummin = 0;
         var style = "" ;
         var qual_arr = {};
+
+        var dimarr = getdims();
+        for (var key in dimarr) {
+            $('#result_table').append('<br/>' + key + ' : ' + dimarr[key]);
+            if(key=="bordft") bordft = dimarr[key];
+            if(key=="linft") linft = dimarr[key];
+        }
 
         $('#result_table').append('<br/>' + 'base rate : ' + baseratemin);
         $.each(data.results, function(k, v) {
@@ -746,21 +759,31 @@ $arr = $framing;
         $('#result_table').append('<br/>BORDER<br/>');
         $.each(data.bord_result, function(k, v) {
             $.each(v, function(key, value) {
+                if(key == "rate_min") bordmin = value;
+                if(key == "rate_max") bordmax = value;
                     $('#result_table').append('<br/>' + key + ' : ' + value);
             });
         });
         }
+
+        if(+bordmin>0) $("#deckingoptionsbord_low_total_b").html('$' + bordmin*bordft);
+        if(+bordmax>0) $("#deckingoptionsbord_high_total_b").html('$' + bordmax*bordft);
 
         if(data.railing_result)
         {
             $('#result_table').append('<br/>RAILING<br/>');
             $.each(data.railing_result, function(k, v) {
                 $.each(v, function(key, value) {
+                    if(key == "rate_min") railingmin = value;
+                    if(key == "rate_max") railingmax = value;
                     $('#result_table').append('<br/>' + key + ' : ' + value);
                 });
             });
         }
 
+        if(+railingmin>0) $("#railing_low_total").html('$' + +railingmin*linft);
+        if(+railingmax>0) $("#railing_high_total").html('$' + +railingmax*linft);
+        
         if(data.stairs_result)
         {
             $('#result_table').append('<br/>RAILING<br/>');
@@ -774,14 +797,11 @@ $arr = $framing;
         console.log('addft\t' + addft);
         var mat = $("#deckmat_low_total");
         var deckopt = $("#deckingoptions_low_total");
-        var dimarr = getdims();
 
         baseaddft = +baseaddft;
         addft = +addft;
 
-        for (var key in dimarr) {
-            $('#result_table').append('<br/>' + key + ' : ' + dimarr[key]);
-        }
+
 
         var sqft = dimarr['sqft'];
         var basemin = Number(baseratemin);
