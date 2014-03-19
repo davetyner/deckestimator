@@ -459,7 +459,7 @@ $arr = $framing;
 
             </form>
         </div>
-    <div id="result_table">HELLO</div>
+    
     </body>
 
 <script type='text/javascript' language='javascript'>
