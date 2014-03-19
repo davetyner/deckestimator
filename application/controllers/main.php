@@ -77,22 +77,29 @@ function alter($name=null)
 }
 
     function getValues(){
+        $this->load->model('get_db');
         if($_POST)
         {
-            $bordid=0;
-            $railingid=0;
-            $stairsid=0;
+            $bordid = 0;
+            $railingid = 0;
+            $stairsid = 0;
+            $lightingid1 = 0;
+            $lightingid2 = 0;
+            $extrasid = 0;
             $dim = $this->input->post('dim');
             $material = $this->input->post('material');
             $style = $this->input->post('style');
             if($this->input->post('deckingoptionsbordid')) $bordid = $this->input->post('deckingoptionsbordid');
             if($this->input->post('railingid')) $railingid = $this->input->post('railingid');
             if($this->input->post('stairsid')) $stairsid = $this->input->post('stairsid');
+            if($this->input->post('lightingid1')) $lightingid1 = $this->input->post('lightingid1');
+            if($this->input->post('lightingid2')) $lightingid2 = $this->input->post('lightingid2');
+            if($this->input->post('extrasid')) $extrasid = $this->input->post('extrasid');
+
         }
 
         $q = "select * from framing where dim = '" . $dim . "' AND style = '" . $style . "' AND material = '" . $material . "'";
         $q2 = "select * from framing where dim = '" . $dim . "' AND material = '" . $material . "'";
-        $this->load->model('get_db');
 
         $bord_q = "select * from deckingoptions where id =" . $bordid;
         $data['bord_result'] = $this->get_db->getAll($bord_q);
@@ -100,9 +107,18 @@ function alter($name=null)
         $railing_q = "select * from railing where id =" . $railingid;
         $data['railing_result'] = $this->get_db->getAll($railing_q);
 
+        $extras_q = "select * from extras where id =" . $extrasid;
+        $data['extras_result'] = $this->get_db->getAll($extras_q);
+        
         $stairsid_q = "select * from stairs where id =" . $stairsid;
         $data['stairs_result'] = $this->get_db->getAll($stairsid_q);
 
+        $lighting1id_q = "select * from lighting where id =" . $lightingid1;
+        $data['lighting1_result'] = $this->get_db->getAll($lighting1id_q);
+
+        $lighting2id_q = "select * from lighting where id =" . $lightingid2;
+        $data['lighting2_result'] = $this->get_db->getAll($lighting2id_q);
+        
         $data['results'] = $this->get_db->getAll($q);
         $data['base_result'] = $this->get_db->getAll($q2);
 

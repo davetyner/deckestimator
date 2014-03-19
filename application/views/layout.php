@@ -473,8 +473,10 @@ $arr = $framing;
             var matcheck = false;
             if(!length || !width) return false;
             var dims = getdims();
+            console.log("dims return");
             var vals = {};
             console.log('\n');
+
             if(dims.length<2)return false; //not enough dims
             else
             {
@@ -498,6 +500,7 @@ $arr = $framing;
                     {
                         console.log("id:\t" + chkid);
                         var idstr = chkid.split("_");
+
                         if(idstr.length>0)
                         {
                             var sec = idstr[0];
@@ -538,6 +541,7 @@ $arr = $framing;
     function get_checkboxes()
     {
         var vals={};
+        vals['lightingid']="";
         $('input[type=checkbox]').each(function () {
             var sThisVal = (this.checked ? "1" : "0");
             if(sThisVal == "1") var chkid = ($(this).prop("id"));
@@ -567,7 +571,33 @@ $arr = $framing;
                 }
                 else if(sec == "lighting")
                 {
-                    vals['lightingid'] = id
+                    var i=0;
+                    //var light = get_light_sel();
+                    $( "input[name^='lighting']").each(function(){
+                        var sThisVal = (this.checked ? "1" : "0");
+                        if(sThisVal == "1")
+                        {
+                            var chkid = $(this).prop("id");
+                            var idstr = chkid.split("_");
+                            if(idstr.length>0)
+                            {
+                                var id = idstr[1];
+                            }
+                            if(i==0)
+                            {
+                                vals['lightingid1'] = id;
+                                console.log("lightingid1\t" + id);
+                            }
+                            else
+                            {
+                                vals['lightingid2'] = id;
+                                console.log("lightingid2\t" + id);
+                            }
+                            i++;
+                        }
+                    });
+
+
                 }
                 else if(sec == "extras")
                 {
@@ -578,6 +608,30 @@ $arr = $framing;
 
         });
         return vals;
+    }
+
+    function get_light_sel()
+    {
+        var lightid = "";
+        var i=0;
+        $( "input[name^='lighting']").each(function(){
+            var sThisVal = (this.checked ? "1" : "0");
+            if(sThisVal == "1")
+            {
+                var chkid = $(this).prop("id");
+                var idstr = chkid.split("_");
+                if(idstr.length>0)
+                {
+                    var id = idstr[1];
+                }
+                if(i==0) lightid = id;
+                else lightid = lightid + "_" + id;
+                i++;
+            }
+        });
+        console.log("lightid:\t" + lightid);
+        return lightid;
+
     }
 
     function count_checkboxes()
@@ -613,6 +667,7 @@ $arr = $framing;
             dims['bordft'] = bordft;
             dims['width'] = width;
             dims['length'] = length;
+            console.log("dims length:\t" + dims['length']);
             if(height)
             {
                 dims['height'] = height;
@@ -628,6 +683,7 @@ $arr = $framing;
             {
                 dims['height'] = 'Please enter Height for Deck'
             }
+
             return dims;
         }
     }
@@ -713,9 +769,11 @@ $arr = $framing;
     {
         var res=[];
         var addft = 0;
+        var addftmax = 0;
         var bordft = 0 ;
         var linft = 0 ;
         var baseaddft = 0;
+        var baseaddftmax = 0;
         var bordmin = 0;
         var bordmax = 0;
         var railingmin = 0;
@@ -728,7 +786,16 @@ $arr = $framing;
         var nummin = 0;
         var style = "" ;
         var qual_arr = {};
-
+        var max_base_total = 0;
+        var max_sec_diff = 0;
+        var lighting1min = 0;
+        var lighting1max = 0;
+        var lighting2min = 0;
+        var lighting2max = 0;
+        var lighting2min = 0;
+        var lighting2max = 0;
+        var extrasmin = 0;
+        var extrasmax = 0;
         var dimarr = getdims();
         for (var key in dimarr) {
             $('#result_table').append('<br/>' + key + ' : ' + dimarr[key]);
@@ -741,9 +808,13 @@ $arr = $framing;
             $.each(v, function(key, value) {
                 $('#result_table').append('<br/>' + key + ' : ' + value);
                 if(key == "rate_min") addft = value;
+                if(key == "rate_max") addftmax = value;
                 if(key == "style") style = value;
             })
         });
+
+        console.log("Am I dead here results?");
+
         $('#result_table').append('<br/>');
         $.each(data.base_result, function(k, v) {
             $.each(v, function(key, value) {
@@ -751,9 +822,13 @@ $arr = $framing;
                 {
                     $('#result_table').append('<br/>' + key + ' : ' + value);
                     if(key == "rate_min") baseaddft = value;
+                    if(key == "rate_max") baseaddftmax = value;
                 }
             })
         });
+
+        console.log("Am I dead here base_results?");
+
         if(data.bord_result)
         {
         $('#result_table').append('<br/>BORDER<br/>');
@@ -765,9 +840,63 @@ $arr = $framing;
             });
         });
         }
-
         if(+bordmin>0) $("#deckingoptionsbord_low_total_b").html('$' + bordmin*bordft);
         if(+bordmax>0) $("#deckingoptionsbord_high_total_b").html('$' + bordmax*bordft);
+
+        if(data.lighting1_result)
+        {
+            $('#result_table').append('<br/>Lighting1<br/>');
+            $.each(data.lighting1_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    if(key == "rate_min") lighting1min = value;
+                    if(key == "rate_max") lighting1max = value;
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+
+        if(data.lighting2_result)
+        {
+            $('#result_table').append('<br/>Lighting2<br/>');
+            $.each(data.lighting2_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    if(key == "rate_min") lighting2min = value;
+                    if(key == "rate_max") lighting2max = value;
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+
+        var num_step_lights = dimarr['num_step_lights'];
+        if(num_step_lights>0)
+        {
+            if(+lighting1min>0) $("#lighting_low_total").html('$' + lighting1min*num_step_lights);
+            if(+lighting1max>0) $("#lighting_high_total").html('$' + lighting1max*num_step_lights);
+            $('#result_table').append('<br/>Stairs Lights Min:' + lighting1min*num_step_lights);
+            $('#result_table').append('<br/>Stairs Lights Max:' + lighting1max*num_step_lights);
+        }
+
+        if(data.lighting2_result)
+        {
+            $('#result_table').append('<br/>Lighting2<br/>');
+            $.each(data.lighting2_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    if(key == "rate_min") lighting2min = value;
+                    if(key == "rate_max") lighting2max = value;
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+
+        if(linft>0)
+        {
+            var n_post_lights = Math.ceil(linft/7);
+            if(+lighting2min>0) $("#lighting_low_total").html('$' + lighting2min*n_post_lights);
+            if(+lighting2max>0) $("#lighting_high_total").html('$' + lighting2max*n_post_lights);
+            $('#result_table').append('<br/>Post Lights Min:' + lighting2min*n_post_lights);
+            $('#result_table').append('<br/>Post Lights Max:' + lighting2max*n_post_lights);
+        }
+        
 
         if(data.railing_result)
         {
@@ -789,19 +918,56 @@ $arr = $framing;
             $('#result_table').append('<br/>RAILING<br/>');
             $.each(data.stairs_result, function(k, v) {
                 $.each(v, function(key, value) {
+                    if(key == "rate_min") stairsmin = value;
+                    if(key == "rate_max") stairsmax = value;
                     $('#result_table').append('<br/>' + key + ' : ' + value);
                 });
             });
         }
+        var nsteps = dimarr['num_steps'];
 
+        if(+stairsmin>0)
+        {
+            var stairs_rail_min = (railingmin*nsteps)*2;
+            var stairsmin = (stairsmin*nsteps);
+            var stairs_min_total = stairs_rail_min + stairsmin;
+            $("#stairs_low_total").html('$' + +stairs_min_total);
+            $('#result_table').append('<br/>Stairs Min:' + stairsmin);
+            $('#result_table').append('<br/>Stair Rail Min:' + stairs_rail_min);
+        }
+        if(+stairsmax>0){
+            var stairs_rail_max = (railingmax*nsteps)*2;
+            var stairsmax = (stairsmax*nsteps);
+            var stairs_max_total = stairs_rail_max + stairsmax;
+            $("#stairs_high_total").html('$' + +stairs_max_total);
+            $('#result_table').append('<br/>Stairs Max:' + stairsmax);
+            $('#result_table').append('<br/>Stair Rail Max:' + stairs_rail_max);
+        }
+
+        if(data.extras_result)
+        {
+            $('#result_table').append('<br/>RAILING<br/>');
+            $.each(data.extras_result, function(k, v) {
+                $.each(v, function(key, value) {
+                    if(key == "rate_min") extrasmin = value;
+                    if(key == "rate_max") extrasmax = value;
+                    $('#result_table').append('<br/>' + key + ' : ' + value);
+                });
+            });
+        }
+        if(+extrasmin>0) $("#extras_low_total").html('$' + +extrasmin);
+        if(+extrasmax>0) $("#extras_high_total").html('$' + +extrasmax);
+        
         console.log('addft\t' + addft);
         var mat = $("#deckmat_low_total");
+        var matmax = $("#deckmat_high_total");
         var deckopt = $("#deckingoptions_low_total");
+        var deckoptmax = $("#deckingoptions_high_total");
 
         baseaddft = +baseaddft;
+        baseaddftmax = +baseaddftmax;
         addft = +addft;
-
-
+        addftmax = +addftmax;
 
         var sqft = dimarr['sqft'];
         var basemin = Number(baseratemin);
@@ -840,10 +1006,46 @@ $arr = $framing;
             }
         }
 
+        var max_base_rate = basemax;
 
-        $('#result_table').append('<br/>' + 'min_sec_diff : ' + min_sec_diff);
+        if (baseaddftmax < 0 )
+        {
+            max_base_rate = basemax + baseaddftmax;
+            console.log("baseaddftmax base rate\t"  + max_base_rate);
+            max_base_total = max_base_rate * sqft
+        }
+        else max_base_total = basemax * sqft;
+
+
+        $(matmax).html('$' + max_base_total);
+
+        if (addftmax != basemax)
+        {
+            if (addftmax < 0 )
+            {
+                opt_max_rate = basemax + addftmax;
+                console.log('OPT base rate\t' + opt_max_rate);
+                max_sec_diff = (opt_max_rate * sqft) - max_base_total;
+                console.log("max_sec_diff\t" + max_sec_diff);
+                if( max_sec_diff < 0 ) max_sec_diff = 0;
+            }
+            else if(addftmax > 0)
+            {
+                var opt_max_rate = basemax + addftmax;
+                console.log("opt_max_rate\t" + opt_max_rate);
+                max_sec_diff = (opt_max_rate * sqft) - max_base_total;
+                console.log("max_sec_diff\t" + max_sec_diff);
+                console.log("max_base_total\t" + max_base_total);
+                if( max_sec_diff < 0 ) max_sec_diff = 0;
+            }
+        }
+
+
+        $('#result_table').append('<br/>' + 'max_sec_diff : ' + min_sec_diff);
 
         $(deckopt).html('$' + min_sec_diff);
+        $(deckoptmax).html('$' + max_sec_diff);
+        get_total();
     }
 </script>
 </html>
