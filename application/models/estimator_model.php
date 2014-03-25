@@ -171,6 +171,7 @@ function estimator_form()
     $data['extras'] = $this->db->query('select * from extras');
     $data['addl_services'] = $this->db->query('select * from addl_services');
     $data['baserate'] = $this->db->query('select rate_min,rate_max from framing where name = "base"');
+    //$data['date_added'] =
 
     return $data;
 	//$this->load->view('estimator_view',$data);

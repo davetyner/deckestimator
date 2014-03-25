@@ -273,29 +273,29 @@ overflow:auto;
 
 /* ---------------------- */
 
-.data .breakdown{
-    float:left;
-    width:29%;
-    text-align: center;
+.breakdown{
+    float:right;
     /*background-color: yellow;*/
 }
 
 .breakdown .b_title{
-    text-align: center;
     color: black;
     background-color: #f0f0f0;
     font-size: 16px;
 }
 
 .breakdown .b_data_title{
-float:left;
 font-size:10px;
 }
 
 .breakdown .note{
 font-size:10px;
 }
+.breakdown ul,li{
+line-height: 14px;
+}
 .breakdown .b_data{
+display:block;
 float:right;
 font-size:1em;
 
@@ -320,6 +320,7 @@ font-size:12px;
     float:left;
     margin:10px;
     border: 2px solid black;
+    display:inline;
 
 }
 
