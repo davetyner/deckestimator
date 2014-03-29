@@ -121,21 +121,17 @@ ul,li{
 overflow:auto;
 }
 
-.stats .stats_title{
-    text-align: center;
-    color: black;
-    background-color: #f0f0f0;
+.stats_title{
+    margin:3px;
+    padding:2px;
     font-size: 16px;
 }
 
-.stats .stats_data{
-
-}
-
-.stats_data ul,li{
-    margin:0;
-    padding:0;
-    display: block;
+.stats_data {
+    margin:3px;
+    padding:2px;
+    font-weight:bold;
+    font-size: 18px;
     /*width:33%;*/
 }
 
@@ -211,9 +207,9 @@ overflow:auto;
 }
 
 .note{
-    color: black;
+    color: #da4f49;
     padding: 0 !important;
-    font-size: .5em;
+    font-size: 12px;
     /*border: 1px solid #424242;*/
 }
 /* ---------------------- */
@@ -289,7 +285,7 @@ font-size:10px;
 }
 
 .breakdown .note{
-font-size:10px;
+font-size:14px;
 }
 .breakdown ul,li{
 line-height: 14px;

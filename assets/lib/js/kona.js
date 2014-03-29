@@ -775,7 +775,7 @@ function getdim(menu)
 
 //---------------> get_total <----------------//
 
-function get_total()
+function get_total(pier_cost)
 {
     var low_total = 0;
     var high_total = 0;
@@ -821,7 +821,7 @@ function get_total()
                     low_el[x].innerHTML = '';
                     if(low_total>0)
                     {
-                        low_el[x].innerHTML = '$' + low_total;
+                        low_el[x].innerHTML = '$' + (+low_total + +pier_cost);
                     }
 
 
@@ -835,7 +835,7 @@ function get_total()
                     high_el[x].innerHTML = '';
                     if(high_total>0)
                     {
-                        high_el[x].innerHTML = '$' + high_total;
+                        high_el[x].innerHTML = '$' + (+high_total + +pier_cost);
                     }
                 }
             }

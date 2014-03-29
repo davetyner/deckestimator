@@ -373,7 +373,8 @@ $arr = $framing;
                     <?
                     }
                     ?>
-                    <div id="<?=$sname?>_breakdown" class="breakdown"></div>
+                    <div id="<?=$sname?>_breakdown1" class="breakdown"></div>
+                    <div id="<?=$sname?>_breakdown2" class="breakdown"></div>
                 </div>
             </div>
 <!--                <div class="section_right breakdown border">
@@ -803,23 +804,25 @@ $arr = $framing;
         var lighting2max = 0;
         var extrasmin = 0;
         var extrasmax = 0;
+        var light_cost_min = 0;
+        var light_cost_max = 0;
         var dimarr = getdims();
         $('#deck_stat').html();
-        $('#deck_stat').html('<ul>');
+        $('#deck_stat').html('<ul class="stats">');
         for (var key in dimarr) {
-            $('#deck_stat').append('<li>' + key + ' : ' + dimarr[key] + '</li>');
+            if(key=="sqft")$('#deck_stat').append('<li><span class=\"stats_title\">Square Feet: </span><span class="stats_data">' +  dimarr[key] + '</span></li>');
+            if(key=="linft")$('#deck_stat').append('<li><span class=\"stats_title\">Linear Feet: </span><span class="stats_data">' +  dimarr[key] + '</span></li>');
             if(key=="bordft") bordft = dimarr[key];
             if(key=="linft") linft = dimarr[key];
         }
         $('#deck_stat').append('</ul>');
-
 
         $('#deckingoptions_breakdown').html();
         $('#deckingoptions_breakdown').html('<ul>');
         //$('#result_table').append('<br/>' + 'base rate : ' + baseratemin);
         $.each(data.results, function(k, v) {
             $.each(v, function(key, value) {
-                if(key != "imgurl") $('#deckingoptions_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                //if(key != "imgurl") $('#deckingoptions_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                 if(key == "rate_min") addft = value;
                 if(key == "rate_max") addftmax = value;
                 if(key == "style") style = value;
@@ -834,13 +837,21 @@ $arr = $framing;
             $.each(v, function(key, value) {
                 if (v['style'] == "strait")
                 {
-                    if(key != "imgurl") $('#base_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                    //if(key != "imgurl") $('#base_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") baseaddft = value;
                     if(key == "rate_max") baseaddftmax = value;
                 }
             })
         });
+        var length = dimarr['length'];
+        var piers = Math.floor(+length/7);
+        if (piers==1) piers = 2;
+        $('#base_breakdown').append('<li>Number of Piers\: ' + piers + '</li>');
+        var pier_cost = piers*137;
+        $('#base_breakdown').append('<li>piers\: $' + pier_cost + '</li>');
         $('#base_breakdown').append('</ul>');
+
+
         //console.log("Am I dead here base_results?");
 
         $('#deckingoptionsbord_breakdown').html();
@@ -850,7 +861,7 @@ $arr = $framing;
         //$('#result_table').append('<br/>BORDER<br/>');
         $.each(data.bord_result, function(k, v) {
             $.each(v, function(key, value) {
-                if(key != "imgurl") $('#deckingoptionsbord_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                //if(key != "imgurl") $('#deckingoptionsbord_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                 if(key == "rate_min") bordmin = value;
                 if(key == "rate_max") bordmax = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
@@ -861,66 +872,77 @@ $arr = $framing;
         if(+bordmin>0) $("#deckingoptionsbord_low_total_b").html('$' + bordmin*bordft);
         if(+bordmax>0) $("#deckingoptionsbord_high_total_b").html('$' + bordmax*bordft);
 
-        $('#lighting_breakdown').html();
-        $('#lighting_breakdown').html('<ul>');
+
+        var num_step_lights = dimarr['num_step_lights'];
+        var n_post_lights = Math.ceil(linft/7);
+
+        $('#lighting_breakdown1').html('');
+        $('#lighting_breakdown1').html('<ul>');
         if(data.lighting1_result)
         {
             //$('#result_table').append('<br/>Lighting1<br/>');
             $.each(data.lighting1_result, function(k, v) {
                 $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#lighting_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                    //if(key != "imgurl") $('#lighting_breakdown1').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") lighting1min = value;
                     if(key == "rate_max") lighting1max = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
                 });
             });
         }
-        $('#lighting_breakdown').append('</ul>');
+        $('#lighting_breakdown1').append('<li>Step lights : ' + num_step_lights + '</li>');
+        $('#lighting_breakdown1').append('</ul>');
 
-
-        $('#lighting_breakdown').append('<ul>');
+        $('#lighting_breakdown2').html('');
+        $('#lighting_breakdown2').append('<ul>');
         if(data.lighting2_result)
         {
-            //$('#result_table').append('<br/>Lighting2<br/>');
+            $('#result_table').append('<br/>Lighting2<br/>');
             $.each(data.lighting2_result, function(k, v) {
                 $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#lighting_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                    //if(key != "imgurl") $('#lighting_breakdown2').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") lighting2min = value;
                     if(key == "rate_max") lighting2max = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
                 });
             });
         }
-        $('#lighting_breakdown').append('</ul>');
+        $('#lighting_breakdown2').append('</ul>');
 
 
-        var num_step_lights = dimarr['num_step_lights'];
+
         if(num_step_lights>0)
         {
-            if(+lighting1min>0) $("#lighting_low_total").html('$' + lighting1min*num_step_lights);
-            if(+lighting1max>0) $("#lighting_high_total").html('$' + lighting1max*num_step_lights);
+            if(lighting1min>0)
+            {
+                light_cost_min = lighting1min*num_step_lights;
+                $("#lighting_low_total").html('$' + light_cost_min);
+            }
+
+            if(lighting1max>0)
+            {
+                light_cost_max = lighting1max*num_step_lights;
+                $("#lighting_high_total").html('$' + light_cost_max);
+            }
             //$('#result_table').append('<br/>Stairs Lights Min:' + lighting1min*num_step_lights);
             //$('#result_table').append('<br/>Stairs Lights Max:' + lighting1max*num_step_lights);
         }
 
-        if(data.lighting2_result)
-        {
-            //$('#result_table').append('<br/>Lighting2<br/>');
-            $.each(data.lighting2_result, function(k, v) {
-                $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#lighting_breakdown').append('<li>' + key + ' : ' + value + '</li>');
-                    if(key == "rate_min") lighting2min = value;
-                    if(key == "rate_max") lighting2max = value;
-                    //$('#result_table').append('<br/>' + key + ' : ' + value);
-                });
-            });
-        }
-
         if(linft>0)
         {
-            var n_post_lights = Math.ceil(linft/7);
-            if(+lighting2min>0) $("#lighting_low_total").html('$' + lighting2min*n_post_lights);
-            if(+lighting2max>0) $("#lighting_high_total").html('$' + lighting2max*n_post_lights);
+            if(+lighting2min>0)
+            {
+                light_cost_min = light_cost_min + (lighting2min*n_post_lights);
+                $("#lighting_low_total").html('$' + light_cost_min);
+                $('#lighting_breakdown2').append('<br /> Num Posts : ' + n_post_lights);
+                $('#lighting_breakdown2').append('<br /> Min Light : ' + (lighting2min*n_post_lights));
+            }
+            if(+lighting2max>0)
+            {
+                light_cost_max = light_cost_max + (lighting2max*n_post_lights);
+                $("#lighting_high_total").html('$' + light_cost_max);
+                $('#lighting_breakdown2').append('<br /> Max Light : ' + (lighting2max*n_post_lights));
+            }
             //$('#result_table').append('<br/>Post Lights Min:' + lighting2min*n_post_lights);
             //$('#result_table').append('<br/>Post Lights Max:' + lighting2max*n_post_lights);
         }
@@ -932,7 +954,7 @@ $arr = $framing;
             //$('#result_table').append('<br/>RAILING<br/>');
             $.each(data.railing_result, function(k, v) {
                 $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#railing_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                    //if(key != "imgurl") $('#railing_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") railingmin = value;
                     if(key == "rate_max") railingmax = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
@@ -951,7 +973,7 @@ $arr = $framing;
             //$('#result_table').append('<br/>RAILING<br/>');
             $.each(data.stairs_result, function(k, v) {
                 $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#stairs_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                    //if(key != "imgurl") $('#stairs_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") stairsmin = value;
                     if(key == "rate_max") stairsmax = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
@@ -960,23 +982,27 @@ $arr = $framing;
         }
         $('#railing_breakdown').append('</ul>');
         var nsteps = dimarr['num_steps'];
-
-        if(+stairsmin>0)
+        if(+nsteps<3)$("#stairs_note").html("Stair price does not include rail");
+        else $("#stairs_note").html('');
+        if(+nsteps>2)
         {
-            var stairs_rail_min = (railingmin*nsteps)*2;
-            var stairsmin = (stairsmin*nsteps);
-            var stairs_min_total = stairs_rail_min + stairsmin;
-            $("#stairs_low_total").html('$' + +stairs_min_total);
-            //$('#result_table').append('<br/>Stairs Min:' + stairsmin);
-            //$('#result_table').append('<br/>Stair Rail Min:' + stairs_rail_min);
-        }
-        if(+stairsmax>0){
-            var stairs_rail_max = (railingmax*nsteps)*2;
-            var stairsmax = (stairsmax*nsteps);
-            var stairs_max_total = stairs_rail_max + stairsmax;
-            $("#stairs_high_total").html('$' + +stairs_max_total);
-            //$('#result_table').append('<br/>Stairs Max:' + stairsmax);
-            //$('#result_table').append('<br/>Stair Rail Max:' + stairs_rail_max);
+            if(+stairsmin>0)
+            {
+                var stairs_rail_min = (railingmin*nsteps)*2;
+                var stairsmin = (stairsmin*nsteps);
+                var stairs_min_total = stairs_rail_min + stairsmin;
+                $("#stairs_low_total").html('$' + +stairs_min_total);
+                //$('#result_table').append('<br/>Stairs Min:' + stairsmin);
+                //$('#result_table').append('<br/>Stair Rail Min:' + stairs_rail_min);
+            }
+            if(+stairsmax>0){
+                var stairs_rail_max = (railingmax*nsteps)*2;
+                var stairsmax = (stairsmax*nsteps);
+                var stairs_max_total = stairs_rail_max + stairsmax;
+                $("#stairs_high_total").html('$' + +stairs_max_total);
+                //$('#result_table').append('<br/>Stairs Max:' + stairsmax);
+                //$('#result_table').append('<br/>Stair Rail Max:' + stairs_rail_max);
+            }
         }
 
         $('#extras_breakdown').html();
@@ -986,7 +1012,7 @@ $arr = $framing;
             //$('#result_table').append('<br/>RAILING<br/>');
             $.each(data.extras_result, function(k, v) {
                 $.each(v, function(key, value) {
-                    if(key != "imgurl") $('#extras_breakdown').append('<li>' + key + ' : ' + value + '</li>');
+                   //if(key != "imgurl") $('#extras_breakdown').append('<li>' + key + ' : ' + value + '</li>');
                     if(key == "rate_min") extrasmin = value;
                     if(key == "rate_max") extrasmax = value;
                     //$('#result_table').append('<br/>' + key + ' : ' + value);
@@ -1085,7 +1111,7 @@ $arr = $framing;
 
         $(deckopt).html('$' + min_sec_diff);
         $(deckoptmax).html('$' + max_sec_diff);
-        get_total();
+        get_total(pier_cost);
     }
 </script>
 </html>
